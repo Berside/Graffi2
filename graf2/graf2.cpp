@@ -4,12 +4,11 @@
 #include <vector>
 #include <random>
 #include <list>
-#include <cstdlib> 
 #include <ctime>
-#include <memory>
 #include <chrono>
-#include <sstream> // For stringstream
+#include <sstream> 
 using namespace std;
+using NodeColorChange = std::pair<int, std::string>;
 
 static int letterChangeCount = 0;
 struct tnode {
@@ -116,45 +115,50 @@ void printNTree(tnode* x, vector<bool>& flag, int depth = 0, bool isLast = false
     flag[depth] = true;
 }
 
-void modifyOddNodes(tnode* node) {
+void modifyOddNodes(tnode* node,vector<NodeColorChange>& modifiedNodes, bool isRoot = true) {
     if (node == nullptr) return;
-    if (node->n % 2 != 0) {
+    if (node->n % 2 != 0 && !isRoot) {
         for (char& letter : node->letters) {
             if (letter == 'Y') {
                 letter = 'B';
                 letterChangeCount++;
+                string colorChange = "Y-B";
+                modifiedNodes.push_back({ node->n, colorChange });
             }
             else if (letter == 'W') {
                 letter = 'Y';
                 letterChangeCount++;
+                string colorChange = "W-Y";
+                modifiedNodes.push_back({ node->n, colorChange });
             }
         }
     }
     for (auto child : node->root) {
-        modifyOddNodes(child);
+        modifyOddNodes(child, modifiedNodes, false);
     }
 }
 
+
 char randomLetter() {
-    static mt19937 gen(time(0)); // Use Mersenne Twister for better randomness
+    static mt19937 gen(time(0)); 
     uniform_int_distribution<> dis(0, 2);
     char letters[] = { 'W', 'B', 'Y' };
     return letters[dis(gen)];
 }
-
-void generateRandomNaryTree(tnode*& node, int& n, int maxDepth = 10) {
-    if (n == 0 || maxDepth == 0) return;
-    node = new tnode(n); 
-    node->addLetter(randomLetter()); 
-    n--;
-    int childCount = rand() % (n + 1);
-    for (int i = 0; i < childCount; ++i) {
-        tnode* child = nullptr;
-        generateRandomNaryTree(child, n, maxDepth - 1);
-        if (child != nullptr) {
-            node->root.push_back(child); 
+tnode* generateNaryTree(int maxDepth, int currentDepth, int& n) {
+    if (currentDepth > maxDepth || n <= 0) return nullptr;
+    int randomValue = 1 + rand() % 100;
+    tnode* node = new tnode(randomValue);
+    node->addLetter(randomLetter());
+    n--; 
+    int childrenCount = rand() % 10 + 1; 
+    for (int i = 0; i < childrenCount && n > 0; i++) {
+        tnode* child = generateNaryTree(maxDepth, currentDepth + 1, n);
+        if (child) {
+            node->root.push_back(child);
         }
     }
+    return node;
 }
 
 
@@ -171,16 +175,21 @@ int main() {
     int k;
     cin >> k;
     cout << endl;
+    vector<pair<int, string>> modifiedNodes;
     if (k == 1) {
         vector<bool> flag(100, false);
         printNTree(root, flag);
         cout << endl;
         auto start1 = chrono::high_resolution_clock::now();
-        modifyOddNodes(root);
+        modifyOddNodes(root, modifiedNodes);
         auto end1 = chrono::high_resolution_clock::now();
         auto duration1 = chrono::duration_cast<chrono::microseconds>(end1 - start1).count();
-        cout << "Number of letters changed: " << letterChangeCount << endl;
+        for (const auto& node : modifiedNodes) {
+            cout << "Вершина " << node.first << " изменила свой цвет: " << node.second.substr(0, 1) << " на " << node.second.substr(2, 1) << endl;
+        }
+        cout << "Количество вершин, которые поменяли цвет: " << letterChangeCount << endl;
         cout << "Время выполения алгоритма: " << duration1 << " microseconds" << endl << endl;
+        cout << "Новое перекрашенное дерево:" << endl;
         printNTree(root, flag);
     }
     if (k == 2) {
@@ -191,16 +200,16 @@ int main() {
         int b = n;
         vector<bool> flag(100, false);
         cout << endl;
-        generateRandomNaryTree(root1, n);
-        if (b < 10) {
+        root1 = generateNaryTree(10, 5, n);
+        if (b <= 100) {
             printNTree(root1, flag);
         }
         auto start1 = chrono::high_resolution_clock::now();
-        modifyOddNodes(root1);
+        modifyOddNodes(root1, modifiedNodes);
         auto end1 = chrono::high_resolution_clock::now();
         auto duration1 = chrono::duration_cast<chrono::microseconds>(end1 - start1).count();
         cout << endl;
-        cout << "Number of letters changed: " << letterChangeCount << endl;
+        cout << "Количество вершин, которые поменяли цвет: " << letterChangeCount << endl;
         cout << "Время выполения алгоритма: " << duration1 << " microseconds" << endl << endl;
     }
     delete root;

@@ -1,4 +1,4 @@
 ﻿  graf2.cpp
-C:\Users\bersi\source\repos\graf2\graf2\graf2.cpp(139,28): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
-C:\Users\bersi\source\repos\graf2\graf2\graf2.cpp(162,15): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+C:\Users\bersi\source\repos\graf2\graf2\graf2.cpp(143,28): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+C:\Users\bersi\source\repos\graf2\graf2\graf2.cpp(166,15): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
   graf2.vcxproj -> C:\Users\bersi\source\repos\graf2\x64\Debug\graf2.exe
